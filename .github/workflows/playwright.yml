@@ -31,13 +31,12 @@ jobs:
           nohup node index.js > backend.log 2>&1 &
         working-directory: ${{ github.workspace }}
 
-      - name: Start Frontend (Build & Serve)
+        - name: Start Frontend
         run: |
           cd client
           npm install
-          npm run build
-          npm install -g serve
-          nohup serve -s build -l 3000 > client/frontend.log 2>&1 &
+          nohup npm start -- --port=3000 > frontend.log 2>&1 &
+        working-directory: ${{ github.workspace }}
 
       - name: Wait for Backend
         run: |
