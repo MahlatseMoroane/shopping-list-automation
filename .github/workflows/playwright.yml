@@ -31,7 +31,7 @@ jobs:
           nohup node index.js > backend.log 2>&1 &
         working-directory: ${{ github.workspace }}
 
-        - name: Start Frontend
+      - name: Start Frontend
         run: |
           cd client
           npm install
@@ -63,7 +63,7 @@ jobs:
           done
 
       - name: Run Playwright tests (6 workers)
-        run:  npx playwright test --workers=6 --reporter=html
+        run: npx playwright test --workers=6 --reporter=html
 
       - name: Upload Playwright HTML report
         if: always()
