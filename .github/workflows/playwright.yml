@@ -31,17 +31,18 @@ jobs:
           nohup node index.js > backend.log 2>&1 &
         working-directory: ${{ github.workspace }}
 
-      - name: Start Frontend
+      - name: Start Frontend (Build & Serve)
         run: |
           cd client
           npm install
-          nohup npm start -- --port=3000 > frontend.log 2>&1 &
-        working-directory: ${{ github.workspace }}
+          npm run build
+          npm install -g serve
+          nohup serve -s build -l 3000 > ../frontend.log 2>&1 &
 
       - name: Wait for Backend
         run: |
           echo "Waiting for backend..."
-          for i in {1..60}; do
+          for i in {1..20}; do
             if curl -s http://localhost:5000/items; then
               echo "Backend is ready"
               break
@@ -53,7 +54,7 @@ jobs:
       - name: Wait for Frontend
         run: |
           echo "Waiting for frontend..."
-          for i in {1..60}; do
+          for i in {1..20}; do
             if curl -s http://localhost:3000 | grep -q '<!DOCTYPE html>'; then
               echo "Frontend is ready"
               break
@@ -62,10 +63,11 @@ jobs:
             sleep 3
           done
 
-      - name: Run Playwright tests
-        run: npx playwright test
+      - name: Run Playwright tests (6 workers)
+        run:  npx playwright test --workers=6 --reporter=html
 
       - name: Upload Playwright HTML report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
@@ -79,4 +81,3 @@ jobs:
       - name: Print backend log on failure
         if: failure()
         run: cat server/backend.log || true
-
